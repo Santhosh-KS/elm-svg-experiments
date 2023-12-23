@@ -11,7 +11,8 @@ import Task exposing (..)
 
 
 type alias Model =
-    { viewport : Maybe Viewport }
+    { viewport : Viewport }
+
 
 
 -- https://ellie-app.com/3nw5FhVJYL4a1
@@ -22,9 +23,26 @@ type alias Model =
 -- If you wanted to measure the viewport on init
 
 
+defaultViewPort : Viewport
+defaultViewPort =
+    { scene =
+        { width = 0
+        , height = 0
+        }
+    , viewport =
+        { x = 0
+        , y = 0
+        , width = 0
+        , height = 0
+        }
+    }
+
+
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { viewport = Nothing }, Task.perform GotViewport Browser.Dom.getViewport )
+    ( { viewport = defaultViewPort }
+    , Task.perform GotViewport Browser.Dom.getViewport
+    )
 
 
 type Msg
@@ -35,17 +53,17 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GotViewport viewport ->
-            ( { model | viewport = Just viewport }, Cmd.none )
+            ( { model | viewport = viewport }, Cmd.none )
 
 
-intToStringWithSpace : Int -> String
-intToStringWithSpace x =
+appendSpace : a -> String
+appendSpace x =
     toString x ++ " "
 
 
 vbs : Int -> Int -> Int -> Int -> String
 vbs x y w h =
-    intToStringWithSpace x ++ intToStringWithSpace y ++ intToStringWithSpace w ++ intToStringWithSpace h
+    appendSpace x ++ appendSpace y ++ appendSpace w ++ appendSpace h
 
 
 view : Model -> Html Msg
@@ -55,22 +73,10 @@ view model =
             (vbs
                 0
                 0
-                (case model.viewport of
-                    Nothing ->
-                        0
-
-                    Just viewport ->
-                        round viewport.viewport.width
-                )
-                (case model.viewport of
-                    Nothing ->
-                        0
-
-                    Just viewport ->
-                        round viewport.viewport.height
-                )
+                (round model.viewport.viewport.width)
+                (round model.viewport.viewport.height)
             )
-        , fill "red"
+        , fill "blue"
         ]
         [ rect
             [ x "10"
