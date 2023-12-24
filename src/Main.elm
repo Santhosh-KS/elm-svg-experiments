@@ -1,4 +1,4 @@
-module Main exposing (fillUrl, main, percentF, percentI)
+module Main exposing (fillUrl, main, percentF, percentI, defaultViewPort)
 
 import Browser
 import Browser.Dom exposing (Viewport)

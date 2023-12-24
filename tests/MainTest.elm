@@ -1,4 +1,4 @@
-module MainTest exposing (..)
+module MainTest exposing (suite, fillUrlTest, percentFTest, percentITest)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
@@ -18,9 +18,9 @@ fillUrlTest =
 
 percentFTest: Test 
 percentFTest =
-  test "Test Float to string with space % conversion" (\_ -> Expect.equal "50% " (percentF 50))
+  test "Test Float to string with space % conversion" (\_ -> Expect.equal "50%" (percentF 50))
 
 percentITest: Test 
 percentITest =
-  test "Test Int to string with space % conversion" (\_ -> Expect.equal "50% " (percentI 50))
+  test "Test Int to string with space % conversion" (\_ -> Expect.equal "50%" (percentI 50))
 
