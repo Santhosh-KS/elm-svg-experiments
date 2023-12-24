@@ -71,14 +71,96 @@ update msg model =
             ( model, viewportTask )
 
 
-appendSpace : a -> String
+appendSpace : String -> String
 appendSpace x =
-    toString x ++ " "
+    x ++ " "
 
 
 vbs : Int -> Int -> Int -> Int -> String
 vbs x y w h =
-    appendSpace x ++ appendSpace y ++ appendSpace w ++ appendSpace h
+    String.fromInt x
+        ++ " "
+        ++ String.fromInt y
+        ++ " "
+        ++ String.fromInt w
+        ++ " "
+        ++ String.fromInt h
+
+
+percentI : Int -> String
+percentI a =
+    String.fromInt a ++ "%"
+
+
+percentF : Float -> String
+percentF a =
+    String.fromFloat a ++ "%"
+
+
+
+{- percent : a -> String
+   percent x =
+     if x == Int  then
+       String.fromInt x ++ "%"
+     else if x == Float then
+       String.fromFloat x ++ "%"
+     else "%"
+-}
+
+
+percentWithSpace : Int -> String
+percentWithSpace a =
+    appendSpace <| percentI a
+
+
+pixel : Int -> String
+pixel a =
+    String.fromInt a ++ "px"
+
+
+seconds : a -> String
+seconds a =
+    toString a ++ "s"
+
+
+rgb : Int -> Int -> Int -> String
+rgb r g b =
+    -- "rgb(" ++ percentWithSpace r ++ percentWithSpace g ++ percentWithSpace b ++ appendSpace "/" ++ percentWithSpace a ++ ")"
+    "rgb(0% 50% 0% / 100%)"
+
+
+
+-- "rgb(" ++ percentWithSpace (range0To255 r) ++ percentWithSpace (range0To255 g) ++ percentWithSpace (range0To255 b) ++ "/ 100%)"
+
+
+range0To255 : Int -> Int
+range0To255 x =
+    if x > 255 then
+        100
+
+    else if x < 0 then
+        0
+
+    else
+        (x // 255) * 100
+
+
+
+-- conditional rendering is possible
+-- https://discourse.elm-lang.org/t/are-there-any-common-patters-for-dealing-with-conditionally-including-markup/5242/6
+
+
+myRect : Model -> Svg msg
+myRect model =
+    rect
+        [ x <| String.fromInt 10
+        , y <| String.fromInt 10
+        , width <| percentI 10
+        , height <| percentI 10
+        , rx <| percentF 10
+        , ry <| percentF 0.8
+        ]
+        []
 
 
 view : Model -> Html Msg
@@ -88,29 +170,34 @@ view model =
             (vbs
                 0
                 0
-                (round model.viewport.scene.width)
-                (round model.viewport.scene.height)
+                (round model.viewport.viewport.width)
+                (round model.viewport.viewport.height)
             )
         , fill "blue"
         ]
-        [ rect
-            [ x "10"
-            , y "10"
-            , width "10%"
-            , height "10%"
-            , rx "15%"
-            , ry "15%"
-            ]
-            [ animate
-                [ attributeName "fill"
-                , dur "10s"
-                , from "green"
-                , to "magenta"
-                , fill "freeze"
-                ]
-                []
-            ]
-        ]
+        [ myRect model ]
+
+
+
+{- [ rect
+       [ x <| String.fromInt 10
+       , y <| String.fromInt 10
+       , width <| percentI 10
+       , height <| percentI 10
+       , rx <| percentF 0.5
+       , ry <| percentF 0.5
+       ]
+       [ animate
+           [ attributeName "fill"
+           , dur <| seconds 10
+           , from <| rgb 0 255 0
+           , to "magenta"
+           , fill "freeze"
+           ]
+           []
+       ]
+   ]
+-}
 
 
 main : Program () Model Msg
