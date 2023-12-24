@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Browser.Dom exposing (Viewport)
+import Browser.Events
 import Debug exposing (toString)
 import Html exposing (Html)
 import Svg exposing (..)
@@ -41,12 +42,23 @@ defaultViewPort =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { viewport = defaultViewPort }
-    , Task.perform GotViewport Browser.Dom.getViewport
+    , viewportTask
     )
+
+
+viewportTask : Cmd Msg
+viewportTask =
+    Task.perform GotViewport Browser.Dom.getViewport
+
+
+subscriptions : a -> Sub Msg
+subscriptions model =
+    Browser.Events.onResize BrowserResized
 
 
 type Msg
     = GotViewport Viewport
+    | BrowserResized Int Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -54,6 +66,9 @@ update msg model =
     case msg of
         GotViewport viewport ->
             ( { model | viewport = viewport }, Cmd.none )
+
+        BrowserResized _ _ ->
+            ( model, viewportTask )
 
 
 appendSpace : a -> String
@@ -73,20 +88,28 @@ view model =
             (vbs
                 0
                 0
-                (round model.viewport.viewport.width)
-                (round model.viewport.viewport.height)
+                (round model.viewport.scene.width)
+                (round model.viewport.scene.height)
             )
         , fill "blue"
         ]
         [ rect
             [ x "10"
             , y "10"
-            , width "100"
-            , height "100"
-            , rx "15"
-            , ry "15"
+            , width "10%"
+            , height "10%"
+            , rx "15%"
+            , ry "15%"
             ]
-            []
+            [ animate
+                [ attributeName "fill"
+                , dur "10s"
+                , from "green"
+                , to "magenta"
+                , fill "freeze"
+                ]
+                []
+            ]
         ]
 
 
@@ -95,6 +118,6 @@ main =
     Browser.element
         { init = init
         , view = view
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , update = update
         }
