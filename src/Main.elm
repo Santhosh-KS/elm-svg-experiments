@@ -1,4 +1,4 @@
-module Main exposing (main)
+module Main exposing (fillUrl, main, percentF, percentI)
 
 import Browser
 import Browser.Dom exposing (Viewport)
@@ -256,11 +256,10 @@ view model =
             )
         , fill "blue"
         ]
-        [
-          grid <| smallGridPattern defaultGridPattern
-          ,gridRect <| smallGridPattern defaultGridPattern
-          , grid <| bigGridPattern defaultGridPattern
-          ,gridRect <| bigGridPattern defaultGridPattern
+        [ grid <| smallGridPattern defaultGridPattern
+        , gridRect <| smallGridPattern defaultGridPattern
+        , grid <| bigGridPattern defaultGridPattern
+        , gridRect <| bigGridPattern defaultGridPattern
         ]
 
 
