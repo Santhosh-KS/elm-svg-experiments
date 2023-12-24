@@ -150,6 +150,21 @@ range0To255 x =
 -- https://discourse.elm-lang.org/t/are-there-any-common-patters-for-dealing-with-conditionally-including-markup/5242/6
 
 
+fillUrl : String -> String
+fillUrl id =
+    "url(#" ++ id ++ ")"
+
+
+gridRect : GridPatternProps -> Svg msg
+gridRect g =
+    rect
+        [ width "100%"
+        , height "100%"
+        , fill <| fillUrl g.id
+        ]
+        []
+
+
 myRect : Model -> Svg msg
 myRect model =
     rect
@@ -161,6 +176,72 @@ myRect model =
         , ry <| percentF 0.8
         ]
         []
+
+
+type alias GridPatternProps =
+    { id : String
+    , stroke : String
+    , strokeWidth : String
+    , path : String
+    , width : String
+    , height : String
+    , fill : String
+    , patternUnits : String
+    }
+
+
+defaultGridPattern : GridPatternProps
+defaultGridPattern =
+    { id = "defaultGridPattern"
+    , stroke = "lightBlue"
+    , strokeWidth = "0.5"
+    , path = "M 0"
+    , width = "10"
+    , height = "10"
+    , fill = "none"
+    , patternUnits = "userSpaceOnUse"
+    }
+
+
+smallGridPattern : GridPatternProps -> GridPatternProps
+smallGridPattern g =
+    { g
+        | id = "smallGridPattern"
+        , path = "M 10 0 L 0 0 0 10"
+        , width = "10"
+        , height = "10"
+    }
+
+
+bigGridPattern : GridPatternProps -> GridPatternProps
+bigGridPattern g =
+    { g
+        | id = "bigGridPattern"
+        , path = "M 100 0 L 0 0 0 100"
+        , width = "100"
+        , height = "100"
+        , strokeWidth = "0.7"
+    }
+
+
+grid : GridPatternProps -> Svg msg
+grid prop =
+    defs []
+        [ pattern
+            [ id prop.id
+            , width prop.width
+            , height prop.height
+            , patternUnits prop.patternUnits
+            ]
+            [ Svg.path
+                [ d prop.path
+                , fill prop.fill
+                , stroke prop.stroke
+                , strokeWidth prop.strokeWidth
+                ]
+                []
+            ]
+        ]
 
 
 view : Model -> Html Msg
@@ -175,7 +256,12 @@ view model =
             )
         , fill "blue"
         ]
-        [ myRect model ]
+        [
+          grid <| smallGridPattern defaultGridPattern
+          ,gridRect <| smallGridPattern defaultGridPattern
+          , grid <| bigGridPattern defaultGridPattern
+          ,gridRect <| bigGridPattern defaultGridPattern
+        ]
 
 
 
