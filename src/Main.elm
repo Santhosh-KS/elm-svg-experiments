@@ -192,7 +192,17 @@ banner r =
    {- svgElements = -}
        append backgroundRect gridPattern
 -}
-
+myText : Svg msg
+myText =
+     Svg.text_
+        [ x "130"
+        , y "130"
+        , fill "yellow"
+        , textAnchor "middle"
+        , dominantBaseline "central"
+        ]
+        [ text "Welcome to text in SVG Elm "
+        ]
 
 view : Model -> Html Msg
 view model =
@@ -245,6 +255,7 @@ view model =
         , rightBar
         , header
         , footer
+        , myText
         ]
 
 
