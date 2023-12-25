@@ -1,10 +1,19 @@
-module Main exposing (fillUrl, main, percentF, percentI, defaultViewPort)
+module Main exposing
+    ( appendSpace
+    , defaultViewPort
+    , main
+    , percentF
+    , percentI
+    , range0To255
+    )
 
 import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Events
 import Debug exposing (toString)
+import GridPattern exposing (..)
 import Html exposing (Html)
+import List exposing (append)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events exposing (..)
@@ -51,7 +60,7 @@ viewportTask =
     Task.perform GotViewport Browser.Dom.getViewport
 
 
-subscriptions : a -> Sub Msg
+subscriptions : Model -> Sub Msg
 subscriptions model =
     Browser.Events.onResize BrowserResized
 
@@ -97,19 +106,8 @@ percentF a =
     String.fromFloat a ++ "%"
 
 
-
-{- percent : a -> String
-   percent x =
-     if x == Int  then
-       String.fromInt x ++ "%"
-     else if x == Float then
-       String.fromFloat x ++ "%"
-     else "%"
--}
-
-
-percentWithSpace : Int -> String
-percentWithSpace a =
+percentIWithSpace : Int -> String
+percentIWithSpace a =
     appendSpace <| percentI a
 
 
@@ -123,26 +121,34 @@ seconds a =
     toString a ++ "s"
 
 
-rgb : Int -> Int -> Int -> String
+rgb : Float -> Float -> Float -> String
 rgb r g b =
-    -- "rgb(" ++ percentWithSpace r ++ percentWithSpace g ++ percentWithSpace b ++ appendSpace "/" ++ percentWithSpace a ++ ")"
+    -- "rgb(" ++ percentIWithSpace (range0To255 r) ++ percentIWithSpace (range0To255 g) ++ percentIWithSpace (range0To255 b) ++ "/ 100%)"
     "rgb(0% 50% 0% / 100%)"
 
 
-
--- "rgb(" ++ percentWithSpace (range0To255 r) ++ percentWithSpace (range0To255 g) ++ percentWithSpace (range0To255 b) ++ "/ 100%)"
-
-
-range0To255 : Int -> Int
+range0To255 : Float -> Float
 range0To255 x =
     if x > 255 then
-        100
+        255
 
     else if x < 0 then
         0
 
     else
-        (x // 255) * 100
+        x
+
+
+normalizeTo100 : Float -> Int
+normalizeTo100 x =
+    round <| range0To255 x / 255 * 100
+
+
+percentString : Int -> String
+percentString x =
+    x
+        |> percentI
+        |> appendSpace
 
 
 
@@ -150,98 +156,13 @@ range0To255 x =
 -- https://discourse.elm-lang.org/t/are-there-any-common-patters-for-dealing-with-conditionally-including-markup/5242/6
 
 
-fillUrl : String -> String
-fillUrl id =
-    "url(#" ++ id ++ ")"
+svgElements : List (Svg msg)
+svgElements =
+    gridPattern
 
 
-gridRect : GridPatternProps -> Svg msg
-gridRect g =
-    rect
-        [ width "100%"
-        , height "100%"
-        , fill <| fillUrl g.id
-        ]
-        []
 
-
-myRect : Model -> Svg msg
-myRect model =
-    rect
-        [ x <| String.fromInt 10
-        , y <| String.fromInt 10
-        , width <| percentI 10
-        , height <| percentI 10
-        , rx <| percentF 10
-        , ry <| percentF 0.8
-        ]
-        []
-
-
-type alias GridPatternProps =
-    { id : String
-    , stroke : String
-    , strokeWidth : String
-    , path : String
-    , width : String
-    , height : String
-    , fill : String
-    , patternUnits : String
-    }
-
-
-defaultGridPattern : GridPatternProps
-defaultGridPattern =
-    { id = "defaultGridPattern"
-    , stroke = "lightBlue"
-    , strokeWidth = "0.5"
-    , path = "M 0"
-    , width = "10"
-    , height = "10"
-    , fill = "none"
-    , patternUnits = "userSpaceOnUse"
-    }
-
-
-smallGridPattern : GridPatternProps -> GridPatternProps
-smallGridPattern g =
-    { g
-        | id = "smallGridPattern"
-        , path = "M 10 0 L 0 0 0 10"
-        , width = "10"
-        , height = "10"
-    }
-
-
-bigGridPattern : GridPatternProps -> GridPatternProps
-bigGridPattern g =
-    { g
-        | id = "bigGridPattern"
-        , path = "M 100 0 L 0 0 0 100"
-        , width = "100"
-        , height = "100"
-        , strokeWidth = "0.7"
-    }
-
-
-grid : GridPatternProps -> Svg msg
-grid prop =
-    defs []
-        [ pattern
-            [ id prop.id
-            , width prop.width
-            , height prop.height
-            , patternUnits prop.patternUnits
-            ]
-            [ Svg.path
-                [ d prop.path
-                , fill prop.fill
-                , stroke prop.stroke
-                , strokeWidth prop.strokeWidth
-                ]
-                []
-            ]
-        ]
+-- append gridPattern gridPattern
 
 
 view : Model -> Html Msg
@@ -256,11 +177,7 @@ view model =
             )
         , fill "blue"
         ]
-        [ grid <| smallGridPattern defaultGridPattern
-        , gridRect <| smallGridPattern defaultGridPattern
-        , grid <| bigGridPattern defaultGridPattern
-        , gridRect <| bigGridPattern defaultGridPattern
-        ]
+        svgElements
 
 
 
