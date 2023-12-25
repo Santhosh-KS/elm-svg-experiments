@@ -13,7 +13,7 @@ import Browser.Events
 import Debug exposing (toString)
 import GridPattern exposing (..)
 import Html exposing (Html)
-import List exposing (append)
+import List exposing (append, head, singleton)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events exposing (..)
@@ -156,50 +156,100 @@ percentString x =
 -- https://discourse.elm-lang.org/t/are-there-any-common-patters-for-dealing-with-conditionally-including-markup/5242/6
 
 
+backgroundRect : List (Svg msg)
+backgroundRect =
+    let
+        color =
+            "rgb(10% 10% 10% / 100%)"
+    in
+    singleton <|
+        Svg.rect
+            [ width "100%"
+            , height "100%"
+            , fill color
+            ]
+            []
+
+
+type alias RectXYWH =
+    { x : Int
+    , y : Int
+    , width : Int
+    , height : Int
+    , color : String
+    }
+
+
+banner : RectXYWH -> Html msg
+banner r =
+    svg
+        [ x <| String.fromInt <| r.x
+        , y <| String.fromInt <| r.y
+        , width <| String.fromInt <| r.width
+        , height <| String.fromInt <| r.height
+        ]
+        [ Svg.rect
+            [ width "100%"
+            , height "100%"
+            , fill r.color
+            ]
+            []
+        ]
+
+
 svgElements : List (Svg msg)
 svgElements =
-    gridPattern
-
-
-
--- append gridPattern gridPattern
+    append backgroundRect gridPattern
 
 
 view : Model -> Html Msg
 view model =
+    let
+        w =
+            round model.viewport.viewport.width
+
+        h =
+            round model.viewport.viewport.height
+
+        headerSize =
+            50
+
+        leftBarSize =
+            headerSize - 10
+
+        rightBarSize =
+            headerSize - 15
+
+        footerSize =
+            headerSize - 20
+
+        fy =
+            h - footerSize
+
+        rbx =
+            w - rightBarSize
+
+        header =
+            banner <| RectXYWH 0 0 w headerSize "red"
+
+        footer =
+            banner <| RectXYWH 0 fy w footerSize "red"
+
+        leftBar =
+            banner <| RectXYWH 0 0 leftBarSize h "green"
+
+        rightBar =
+            banner <| RectXYWH rbx 0 leftBarSize h "green"
+    in
     svg
-        [ viewBox
-            (vbs
-                0
-                0
-                (round model.viewport.viewport.width)
-                (round model.viewport.viewport.height)
-            )
+        [ viewBox <| vbs 0 0 w h
         , fill "blue"
         ]
-        svgElements
-
-
-
-{- [ rect
-       [ x <| String.fromInt 10
-       , y <| String.fromInt 10
-       , width <| percentI 10
-       , height <| percentI 10
-       , rx <| percentF 0.5
-       , ry <| percentF 0.5
-       ]
-       [ animate
-           [ attributeName "fill"
-           , dur <| seconds 10
-           , from <| rgb 0 255 0
-           , to "magenta"
-           , fill "freeze"
-           ]
-           []
-       ]
-   ]
--}
+        [ leftBar
+        , rightBar
+        , header
+        , footer
+        ]
 
 
 main : Program () Model Msg
