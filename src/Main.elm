@@ -13,7 +13,7 @@ import Browser.Events
 import Debug exposing (toString)
 import GridPattern exposing (..)
 import Html exposing (Html)
-import List exposing (append, head, singleton)
+import List exposing (append, singleton)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events exposing (..)
@@ -22,15 +22,6 @@ import Task exposing (..)
 
 type alias Model =
     { viewport : Viewport }
-
-
-
--- https://ellie-app.com/3nw5FhVJYL4a1
-{- init : () -> ( Model, Cmd Msg )
-   init _ =
-       ( { viewport = Nothing }, Cmd.none )
--}
--- If you wanted to measure the viewport on init
 
 
 defaultViewPort : Viewport
@@ -156,19 +147,18 @@ percentString x =
 -- https://discourse.elm-lang.org/t/are-there-any-common-patters-for-dealing-with-conditionally-including-markup/5242/6
 
 
-backgroundRect : List (Svg msg)
+backgroundRect : Svg msg
 backgroundRect =
     let
         color =
             "rgb(10% 10% 10% / 100%)"
     in
-    singleton <|
-        Svg.rect
-            [ width "100%"
-            , height "100%"
-            , fill color
-            ]
-            []
+    Svg.rect
+        [ width "100%"
+        , height "100%"
+        , fill color
+        ]
+        []
 
 
 type alias RectXYWH =
@@ -197,9 +187,11 @@ banner r =
         ]
 
 
-svgElements : List (Svg msg)
-svgElements =
-    append backgroundRect gridPattern
+
+{- svgElements : List (Svg msg)
+   {- svgElements = -}
+       append backgroundRect gridPattern
+-}
 
 
 view : Model -> Html Msg
@@ -245,7 +237,11 @@ view model =
         [ viewBox <| vbs 0 0 w h
         , fill "blue"
         ]
-        [ leftBar
+        [backgroundRect 
+          , grid sgProp bgProp
+        , smallGrid
+        , bigGrid
+        , leftBar
         , rightBar
         , header
         , footer

@@ -1,4 +1,4 @@
-module GridPattern exposing (gridPattern)
+module GridPattern exposing (smallGrid, bigGrid, gridRect, sgProp, bgProp, grid)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -108,3 +108,9 @@ gridPattern =
     , gridRect <| sgProp
     , gridRect <| bgProp
     ]
+
+smallGrid : Svg msg
+smallGrid = gridRect <| sgProp
+
+bigGrid : Svg msg
+bigGrid = gridRect <| bgProp
