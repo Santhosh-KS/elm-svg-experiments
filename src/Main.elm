@@ -2,18 +2,22 @@ module Main exposing
     ( appendSpace
     , defaultViewPort
     , main
-    , percentF
-    , percentI
     , range0To255
     )
 
 import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Events
+import Common exposing (..)
+import Conversion exposing (..)
 import Debug exposing (toString)
 import GridPattern exposing (..)
-import Html exposing (Html)
+import Html exposing (Html, div, input)
+import Html.Attributes exposing (contenteditable, placeholder)
+import Html.Events exposing (onInput)
 import List exposing (append, singleton)
+import Rect exposing (..)
+import StateModal exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events exposing (..)
@@ -21,7 +25,13 @@ import Task exposing (..)
 
 
 type alias Model =
-    { viewport : Viewport }
+    { viewport : Viewport
+    , inputText : String
+    }
+
+
+defaultText =
+    "Hello"
 
 
 defaultViewPort : Viewport
@@ -41,7 +51,7 @@ defaultViewPort =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { viewport = defaultViewPort }
+    ( { viewport = defaultViewPort, inputText = defaultText }
     , viewportTask
     )
 
@@ -59,6 +69,7 @@ subscriptions model =
 type Msg
     = GotViewport Viewport
     | BrowserResized Int Int
+    | OnTextChange String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -69,6 +80,9 @@ update msg model =
 
         BrowserResized _ _ ->
             ( model, viewportTask )
+
+        OnTextChange newData ->
+            ( { model | inputText = newData }, Cmd.none )
 
 
 appendSpace : String -> String
@@ -87,37 +101,6 @@ vbs x y w h =
         ++ String.fromInt h
 
 
-percentI : Int -> String
-percentI a =
-    String.fromInt a ++ "%"
-
-
-percentF : Float -> String
-percentF a =
-    String.fromFloat a ++ "%"
-
-
-percentIWithSpace : Int -> String
-percentIWithSpace a =
-    appendSpace <| percentI a
-
-
-pixel : Int -> String
-pixel a =
-    String.fromInt a ++ "px"
-
-
-seconds : a -> String
-seconds a =
-    toString a ++ "s"
-
-
-rgb : Float -> Float -> Float -> String
-rgb r g b =
-    -- "rgb(" ++ percentIWithSpace (range0To255 r) ++ percentIWithSpace (range0To255 g) ++ percentIWithSpace (range0To255 b) ++ "/ 100%)"
-    "rgb(0% 50% 0% / 100%)"
-
-
 range0To255 : Float -> Float
 range0To255 x =
     if x > 255 then
@@ -128,18 +111,6 @@ range0To255 x =
 
     else
         x
-
-
-normalizeTo100 : Float -> Int
-normalizeTo100 x =
-    round <| range0To255 x / 255 * 100
-
-
-percentString : Int -> String
-percentString x =
-    x
-        |> percentI
-        |> appendSpace
 
 
 
@@ -187,22 +158,33 @@ banner r =
         ]
 
 
-
-{- svgElements : List (Svg msg)
-   {- svgElements = -}
-       append backgroundRect gridPattern
--}
 myText : Svg msg
 myText =
-     Svg.text_
+    Svg.text_
         [ x "130"
         , y "130"
-        , fill "yellow"
+        , fill "red"
         , textAnchor "middle"
         , dominantBaseline "central"
+        , textDecoration "underline"
         ]
-        [ text "Welcome to text in SVG Elm "
+        [ text "HowDowYou"
         ]
+
+
+fod : Svg msg
+fod =
+    foreignObject
+        [ x "120"
+        , y "120"
+        , width "60"
+        , height "160"
+        , fill "white"
+        , stroke "white"
+        ]
+        [ div [ contenteditable True ] [ text "EditMe" ]
+        ]
+
 
 view : Model -> Html Msg
 view model =
@@ -247,16 +229,29 @@ view model =
         [ viewBox <| vbs 0 0 w h
         , fill "blue"
         ]
-        [backgroundRect 
-          , grid sgProp bgProp
+        [ backgroundRect
+        , grid sgProp bgProp
         , smallGrid
         , bigGrid
         , leftBar
-        , rightBar
         , header
-        , footer
-        , myText
+        , modal
         ]
+
+
+
+{- [ backgroundRect
+   , grid sgProp bgProp
+   , smallGrid
+   , bigGrid
+   , leftBar
+   , rightBar
+   , header
+   , footer
+   , myText
+   , fod
+   ]
+-}
 
 
 main : Program () Model Msg

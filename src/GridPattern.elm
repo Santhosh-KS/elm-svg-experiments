@@ -1,4 +1,4 @@
-module GridPattern exposing (smallGrid, bigGrid, gridRect, sgProp, bgProp, grid)
+module GridPattern exposing (bgProp, bigGrid, grid, gridRect, sgProp, smallGrid)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
@@ -16,6 +16,7 @@ gridRect g =
         [ width "100%"
         , height "100%"
         , fill <| fillUrl g.id
+        , opacity "15%"
         ]
         []
 
@@ -29,6 +30,7 @@ type alias GridPatternProps =
     , height : String
     , fill : String
     , patternUnits : String
+    , opacity : String
     }
 
 
@@ -42,6 +44,7 @@ defaultGridPattern =
     , height = "10"
     , fill = "none"
     , patternUnits = "userSpaceOnUse"
+    , opacity = "0.5"
     }
 
 
@@ -52,6 +55,7 @@ smallGridPattern g =
         , path = "M 10 0 L 0 0 0 10"
         , width = "10"
         , height = "10"
+        , opacity = "0.4"
     }
 
 
@@ -73,6 +77,7 @@ pattern g =
         , width g.width
         , height g.height
         , patternUnits g.patternUnits
+        , operator g.opacity
         ]
         [ Svg.path
             [ d g.path
@@ -109,8 +114,12 @@ gridPattern =
     , gridRect <| bgProp
     ]
 
+
 smallGrid : Svg msg
-smallGrid = gridRect <| sgProp
+smallGrid =
+    gridRect <| sgProp
+
 
 bigGrid : Svg msg
-bigGrid = gridRect <| bgProp
+bigGrid =
+    gridRect <| bgProp
