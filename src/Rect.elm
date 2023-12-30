@@ -9,7 +9,7 @@ import Svg.Events exposing (..)
 
 type alias Attributes =
     { size : Size
-    , cornerRadius : RadiusXY
+    , cornerRadius : CornerRadius
     , position : Position
     }
 
@@ -26,22 +26,22 @@ rect : Attributes -> Presentation -> Svg msg
 rect rA pA =
     let
         posx =
-            rA.position.x |> percentI
+            getX rA.position |> percentI
 
         posy =
-            rA.position.y |> percentI
+            getY rA.position |> percentI
 
         w =
-            rA.size.width |> percentI
+            getWidth rA.size |> percentI
 
         h =
-            rA.size.height |> percentI
+            getHeight rA.size |> percentI
 
         crx =
-            rA.cornerRadius.rx |> percentI
+            getRx rA.cornerRadius |> percentI
 
         cry =
-            rA.cornerRadius.ry |> percentI
+            getRy rA.cornerRadius |> percentI
 
         sw =
             pA.storkeWidht |> percentI

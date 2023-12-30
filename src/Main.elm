@@ -69,7 +69,6 @@ subscriptions model =
 type Msg
     = GotViewport Viewport
     | BrowserResized Int Int
-    | OnTextChange String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -80,9 +79,6 @@ update msg model =
 
         BrowserResized _ _ ->
             ( model, viewportTask )
-
-        OnTextChange newData ->
-            ( { model | inputText = newData }, Cmd.none )
 
 
 appendSpace : String -> String
@@ -168,7 +164,7 @@ myText =
         , dominantBaseline "central"
         , textDecoration "underline"
         ]
-        [ text "HowDowYou"
+        [ text "Howdy"
         ]
 
 
@@ -235,7 +231,7 @@ view model =
         , bigGrid
         , leftBar
         , header
-        , modal
+        , modal <| withDefaultStateModel "State-1"
         ]
 
 

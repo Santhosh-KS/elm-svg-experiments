@@ -1,4 +1,4 @@
-module StateModal exposing (modal)
+module StateModal exposing (getStateModel, modal, withDefaultStateModel)
 
 import Common exposing (..)
 import Conversion exposing (..)
@@ -8,21 +8,48 @@ import Svg.Attributes exposing (..)
 import Svg.Events exposing (..)
 
 
-modal : Svg msg
-modal =
+type StateModel 
+    = StateModel
+        { id : String
+        , size : Size
+        , position : Position
+        }
+
+-- TODO: ID should be unique for each of the StateModel
+
+withDefaultStateModel: String -> StateModel
+withDefaultStateModel id =
+    getStateModel
+        { id = id 
+        , size = getSize { width = 300, height = 500 }
+        , position = getPosition { x = 100, y = 100 }
+        }
+
+
+getStateModel : { id : String, size : Size, position : Position } -> StateModel
+getStateModel m =
+    StateModel { id = m.id, size = m.size, position = m.position }
+
+
+modal : StateModel -> Svg msg
+modal (StateModel mp) =
     let
         posX =
-            String.fromInt 300
+            String.fromInt <| getX mp.position
 
+        -- String.fromInt 300
         posY =
-            String.fromInt 300
+            String.fromInt <| getY mp.position
 
+        -- String.fromInt 100
         svgWidth =
-            300
+            getWidth mp.size
 
+        -- 300
         svgHeight =
-            300
+            getHeight mp.size
 
+        -- 500
         svgOpacity =
             100 |> percentI
 
@@ -33,16 +60,16 @@ modal =
             50
 
         rx =
-            percentOf 0.3 svgWidth
+            percentOf { x = 0.3, of_ = svgWidth }
 
         ry =
-            percentOf 0.3 svgHeight
+            percentOf { x = 0.3, of_ = svgHeight }
 
         rt : Rect.Attributes
         rt =
-            { size = getSize w h
-            , position = getPosition 0 0
-            , cornerRadius = getRadiusXY rx ry
+            { size = getSize { width = w, height = h }
+            , position = getPosition { x = 0, y = 0 }
+            , cornerRadius = getCornerRadius { rx = rx, ry = ry }
             }
 
         pa : Rect.Presentation
@@ -74,9 +101,13 @@ modal =
             in
             Rect.rect
                 { rt
-                    | size = { width = lw, height = lh }
-                    , position = { x = ox, y = oy }
-                    , cornerRadius = { rx = percentOf 1 lw, ry = percentOf 1 lw }
+                    | size = getSize { width = lw, height = lh }
+                    , position = getPosition { x = ox, y = oy }
+                    , cornerRadius =
+                        getCornerRadius
+                            { rx = percentOf { x = 1, of_ = lw }
+                            , ry = percentOf { x = 1, of_ = lw }
+                            }
                 }
                 { pa | fill = "lightblue" }
 
@@ -97,9 +128,13 @@ modal =
             in
             Rect.rect
                 { rt
-                    | size = { width = lw, height = lh }
-                    , position = { x = ox, y = oy }
-                    , cornerRadius = { rx = percentOf 1 lw, ry = percentOf 1 lw }
+                    | size = getSize { width = lw, height = lh }
+                    , position = getPosition { x = ox, y = oy }
+                    , cornerRadius =
+                        getCornerRadius
+                            { rx = percentOf { x = 1, of_ = lw }
+                            , ry = percentOf { x = 1, of_ = lw }
+                            }
                 }
                 { pa | fill = "lightblue" }
     in

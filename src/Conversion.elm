@@ -11,13 +11,13 @@ percentF a =
     String.fromFloat a ++ "%"
 
 
-percentOf : Float -> Int -> Int
-percentOf n w =
+percentOf : { x : Float, of_ : Int } -> Int
+percentOf d =
     let
         f =
-            n / toFloat 100
+            d.x / toFloat 100
     in
-    round (f * toFloat w)
+    round (f * toFloat d.of_)
 
 
 pixel : Int -> String
