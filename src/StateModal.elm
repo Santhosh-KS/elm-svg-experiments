@@ -4,23 +4,25 @@ import Common exposing (..)
 import Conversion exposing (..)
 import Rect exposing (..)
 import Svg exposing (..)
-import Svg.Attributes exposing (..)
-import Svg.Events exposing (..)
+import Svg.Attributes as SA exposing (..)
 
 
-type StateModel 
+type StateModel
     = StateModel
         { id : String
         , size : Size
         , position : Position
         }
 
+
+
 -- TODO: ID should be unique for each of the StateModel
 
-withDefaultStateModel: String -> StateModel
+
+withDefaultStateModel : String -> StateModel
 withDefaultStateModel id =
     getStateModel
-        { id = id 
+        { id = id
         , size = getSize { width = 300, height = 500 }
         , position = getPosition { x = 100, y = 100 }
         }
@@ -138,16 +140,14 @@ modal (StateModel mp) =
                 }
                 { pa | fill = "lightblue" }
     in
-    g []
-        [ svg
-            [ x posX
-            , y posY
-            , width (svgWidth |> pixel)
-            , height (svgHeight |> pixel)
-            , opacity svgOpacity
-            ]
-            [ body
-            , header
-            , footer
-            ]
+    svg
+        [ x posX
+        , y posY
+        , width (svgWidth |> pixel)
+        , height (svgHeight |> pixel)
+        , opacity svgOpacity
+        ]
+        [ body
+        , header
+        , footer
         ]

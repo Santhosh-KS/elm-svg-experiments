@@ -20,13 +20,14 @@ import Rect exposing (..)
 import StateModal exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Svg.Events exposing (..)
+import Svg.Events as SE exposing (..)
 import Task exposing (..)
 
 
 type alias Model =
     { viewport : Viewport
     , inputText : String
+    , testCount: Int
     }
 
 
@@ -51,7 +52,7 @@ defaultViewPort =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { viewport = defaultViewPort, inputText = defaultText }
+    ( { viewport = defaultViewPort, inputText = defaultText, testCount = 0 }
     , viewportTask
     )
 
@@ -65,10 +66,10 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Browser.Events.onResize BrowserResized
 
-
 type Msg
     = GotViewport Viewport
     | BrowserResized Int Int
+    | OnSvgClick Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -79,6 +80,9 @@ update msg model =
 
         BrowserResized _ _ ->
             ( model, viewportTask )
+
+        OnSvgClick v ->
+          ({ model | testCount = v + 1}, Cmd.none)
 
 
 appendSpace : String -> String
@@ -113,20 +117,21 @@ range0To255 x =
 -- conditional rendering is possible
 -- https://discourse.elm-lang.org/t/are-there-any-common-patters-for-dealing-with-conditionally-including-markup/5242/6
 
-
-backgroundRect : Svg msg
-backgroundRect =
+backgroundRect : Int -> Svg msg
+backgroundRect v =
     let
-        color =
-            "rgb(10% 10% 10% / 100%)"
+        color = 
+            if (modBy 2 v) == 0 then
+                "green"
+            else
+                "blue"
     in
-    Svg.rect
-        [ width "100%"
-        , height "100%"
-        , fill color
-        ]
-        []
-
+      Svg.rect
+          [ width "100%"
+          , height "100%"
+          , fill color 
+          ]
+          []
 
 type alias RectXYWH =
     { x : Int
@@ -224,8 +229,9 @@ view model =
     svg
         [ viewBox <| vbs 0 0 w h
         , fill "blue"
+        , SE.onClick <| OnSvgClick model.testCount
         ]
-        [ backgroundRect
+        [ backgroundRect model.testCount
         , grid sgProp bgProp
         , smallGrid
         , bigGrid
