@@ -4,8 +4,7 @@ import Common exposing (..)
 import Conversion exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Svg.Events exposing (..)
-
+import Text exposing (..)
 
 type alias Attributes =
     { size : Size
@@ -70,4 +69,5 @@ rect rA pA =
         , stroke strk
         , opacity opcity
         ]
-        []
+        [
+          ]

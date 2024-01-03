@@ -5,6 +5,8 @@ import Conversion exposing (..)
 import Rect exposing (..)
 import Svg exposing (..)
 import Svg.Attributes as SA exposing (..)
+import Svg.Events as SE exposing (..)
+import Text exposing (..)
 
 
 type StateModel
@@ -12,10 +14,12 @@ type StateModel
         { id : String
         , size : Size
         , position : Position
+        , testNumber : Int -- Delete ME
         }
 
 
 
+{- type Msg = OnSvgClick Int -}
 -- TODO: ID should be unique for each of the StateModel
 
 
@@ -30,7 +34,16 @@ withDefaultStateModel id =
 
 getStateModel : { id : String, size : Size, position : Position } -> StateModel
 getStateModel m =
-    StateModel { id = m.id, size = m.size, position = m.position }
+    StateModel { id = m.id, size = m.size, position = m.position, testNumber = 0 }
+
+
+
+{- update : Msg -> StateModel -> ( StateModel, Cmd Msg )
+   update msg model =
+       case msg of
+           OnSvgClick v ->
+             ({model | testNumber = v + 1}, Cmd.none)
+-}
 
 
 modal : StateModel -> Svg msg
@@ -113,6 +126,33 @@ modal (StateModel mp) =
                 }
                 { pa | fill = "lightblue" }
 
+        ht =
+            let
+                oy =
+                    5
+
+                ox =
+                    oy // 2
+
+                lw =
+                    w - oy
+
+                lh =
+                    7
+
+                b =
+                    { rt
+                        | size = getSize { width = lw, height = lh }
+                        , position = getPosition { x = ox, y = oy }
+                        , cornerRadius =
+                            getCornerRadius
+                                { rx = percentOf { x = 1, of_ = lw }
+                                , ry = percentOf { x = 1, of_ = lw }
+                                }
+                    }
+            in
+            stateText b.position mp.id
+
         footer : Svg msg
         footer =
             let
@@ -149,5 +189,6 @@ modal (StateModel mp) =
         ]
         [ body
         , header
+        , ht
         , footer
         ]

@@ -8,6 +8,7 @@ module Main exposing
 import Browser
 import Browser.Dom exposing (Viewport)
 import Browser.Events
+import Browser.Navigation exposing (back)
 import Common exposing (..)
 import Conversion exposing (..)
 import Debug exposing (toString)
@@ -15,7 +16,7 @@ import GridPattern exposing (..)
 import Html exposing (Html, div, input)
 import Html.Attributes exposing (contenteditable, placeholder)
 import Html.Events exposing (onInput)
-import List exposing (append, singleton)
+import List exposing (..)
 import Rect exposing (..)
 import StateModal exposing (..)
 import Svg exposing (..)
@@ -27,7 +28,8 @@ import Task exposing (..)
 type alias Model =
     { viewport : Viewport
     , inputText : String
-    , testCount: Int
+    , testCount : Int
+    , premetives : List (Svg Msg)
     }
 
 
@@ -52,7 +54,7 @@ defaultViewPort =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { viewport = defaultViewPort, inputText = defaultText, testCount = 0 }
+    ( { viewport = defaultViewPort, inputText = defaultText, testCount = 0, premetives = basicPremitives }
     , viewportTask
     )
 
@@ -66,10 +68,16 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Browser.Events.onResize BrowserResized
 
+
 type Msg
     = GotViewport Viewport
     | BrowserResized Int Int
     | OnSvgClick Int
+
+
+findTheState : Model -> ( Model, Cmd Msg )
+findTheState m =
+    ( m, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -82,7 +90,16 @@ update msg model =
             ( model, viewportTask )
 
         OnSvgClick v ->
-          ({ model | testCount = v + 1}, Cmd.none)
+            let
+                nn =
+                    getStateModel
+                        { id = "State-"  ++ String.fromInt v 
+                        , size = getSize { width = 300 + v*10, height = 500 + v*10 }
+                        , position = getPosition { x = 100+v*10, y = 100+v*10 }
+                        }
+            in
+            ( { model | testCount = v + 1,
+            premetives = updatePremitives model.premetives (modal nn)}, Cmd.none )
 
 
 appendSpace : String -> String
@@ -117,21 +134,24 @@ range0To255 x =
 -- conditional rendering is possible
 -- https://discourse.elm-lang.org/t/are-there-any-common-patters-for-dealing-with-conditionally-including-markup/5242/6
 
+
 backgroundRect : Int -> Svg msg
 backgroundRect v =
     let
-        color = 
-            if (modBy 2 v) == 0 then
-                "green"
+        color =
+            if modBy 2 v == 0 then
+                "rgb(10% 10% 10% / 100%)"
+
             else
-                "blue"
+                "rgb(30% 30% 30% / 100%)"
     in
-      Svg.rect
-          [ width "100%"
-          , height "100%"
-          , fill color 
-          ]
-          []
+    Svg.rect
+        [ width "100%"
+        , height "100%"
+        , fill color
+        ]
+        []
+
 
 type alias RectXYWH =
     { x : Int
@@ -164,10 +184,9 @@ myText =
     Svg.text_
         [ x "130"
         , y "130"
-        , fill "red"
+        , fill "blue"
         , textAnchor "middle"
         , dominantBaseline "central"
-        , textDecoration "underline"
         ]
         [ text "Howdy"
         ]
@@ -186,6 +205,19 @@ fod =
         [ div [ contenteditable True ] [ text "EditMe" ]
         ]
 
+
+basicPremitives : List (Svg msg)
+basicPremitives =
+    [ backgroundRect 0
+    , grid sgProp bgProp
+    , smallGrid
+    , bigGrid
+    ]
+
+
+updatePremitives : List(Svg msg) -> Svg msg -> List (Svg msg)
+updatePremitives ls d =
+  append ls (singleton d)
 
 view : Model -> Html Msg
 view model =
@@ -231,17 +263,19 @@ view model =
         , fill "blue"
         , SE.onClick <| OnSvgClick model.testCount
         ]
-        [ backgroundRect model.testCount
-        , grid sgProp bgProp
-        , smallGrid
-        , bigGrid
-        , leftBar
-        , header
-        , modal <| withDefaultStateModel "State-1"
-        ]
+        model.premetives
 
 
 
+{- [ backgroundRect model.testCount
+   , grid sgProp bgProp
+   , smallGrid
+   , bigGrid
+   , leftBar
+   , header
+   , modal <| withDefaultStateModel "State-XYZ"
+   ]
+-}
 {- [ backgroundRect
    , grid sgProp bgProp
    , smallGrid
