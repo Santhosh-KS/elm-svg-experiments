@@ -16,6 +16,7 @@ import GridPattern exposing (..)
 import Html exposing (Html, div, input)
 import Html.Attributes exposing (contenteditable, placeholder)
 import Html.Events exposing (onInput)
+import Json.Decode as D exposing (..)
 import List exposing (..)
 import Rect exposing (..)
 import StateModal exposing (..)
@@ -23,6 +24,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events as SE exposing (..)
 import Task exposing (..)
+import Browser.Events exposing (onKeyPress)
 
 
 type alias Model =
@@ -35,6 +37,19 @@ type alias Model =
 
 defaultText =
     "Hello"
+
+
+ifIsEnter : msg -> D.Decoder msg
+ifIsEnter msg =
+  D.field "key" D.string
+    |> D.andThen (\key -> if key == "Enter" then D.succeed msg else D.fail "some other key")
+
+-- mousemove
+
+
+onMouseMove : msg -> Attribute msg 
+onMouseMove msg =
+    SE.on "mousemove" (D.succeed msg)
 
 
 defaultViewPort : Viewport
@@ -93,13 +108,17 @@ update msg model =
             let
                 nn =
                     getStateModel
-                        { id = "State-"  ++ String.fromInt v 
-                        , size = getSize { width = 300 + v*10, height = 500 + v*10 }
-                        , position = getPosition { x = 100+v*10, y = 100+v*10 }
+                        { id = "State-" ++ String.fromInt v
+                        , size = getSize { width = 300 + v * 10, height = 500 + v * 10 }
+                        , position = getPosition { x = 100 + v * 10, y = 100 + v * 10 }
                         }
             in
-            ( { model | testCount = v + 1,
-            premetives = updatePremitives model.premetives (modal nn)}, Cmd.none )
+            ( { model
+                | testCount = v + 1
+                , premetives = updatePremitives model.premetives (modal nn)
+              }
+            , Cmd.none
+            )
 
 
 appendSpace : String -> String
@@ -215,9 +234,10 @@ basicPremitives =
     ]
 
 
-updatePremitives : List(Svg msg) -> Svg msg -> List (Svg msg)
+updatePremitives : List (Svg msg) -> Svg msg -> List (Svg msg)
 updatePremitives ls d =
-  append ls (singleton d)
+    append ls (singleton d)
+
 
 view : Model -> Html Msg
 view model =
@@ -261,7 +281,20 @@ view model =
     svg
         [ viewBox <| vbs 0 0 w h
         , fill "blue"
-        , SE.onClick <| OnSvgClick model.testCount
+        , id "MainSvg"
+        -- , SE.onClick <| OnSvgClick model.testCount
+        -- , SE.on "wheel" <| D.succeed <| OnSvgClick model.testCount
+        -- , SE.on "contextmenu" <| (D.succeed <| OnSvgClick model.testCount)
+        -- , SE.on "pointerdown" <| (D.succeed <| OnSvgClick model.testCount)
+        -- pointer events https://www.youtube.com/watch?v=MhUCYR9Tb9c&t=10s
+        -- https://www.youtube.com/watch?v=XF1_MlZ5l6M Event listners
+        , SE.on "pointermove" <| (D.succeed <| OnSvgClick model.testCount)
+        -- TODO
+        -- https://discourse.elm-lang.org/t/triggering-arrowup-in-elm-spc/6457/4
+        -- not working list
+        -- , SE.on "keypress" <| (D.succeed <| OnSvgClick model.testCount)
+        -- , SE.on "keydown" <| (D.succeed <| OnSvgClick model.testCount)
+        -- , SE.on "scroll" <| D.succeed <| OnSvgClick model.testCount
         ]
         model.premetives
 

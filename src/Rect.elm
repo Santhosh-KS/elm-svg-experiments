@@ -6,6 +6,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Text exposing (..)
 
+
 type alias Attributes =
     { size : Size
     , cornerRadius : CornerRadius
@@ -69,5 +70,4 @@ rect rA pA =
         , stroke strk
         , opacity opcity
         ]
-        [
-          ]
+        []
